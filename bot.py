@@ -20,7 +20,7 @@ def extract_url(*args):
         repo, *branch = repo.split("@")
         if branch == []:
             branch = "master"
-    # print(user, repo, branch)
+    print(user, repo, branch)
     url = f"https://github.com/{user}/{repo}/commits/{branch}"
     return url
 
@@ -45,6 +45,7 @@ async def on_ready():
             print(file)
             with open("links/"+file) as f:
                 server = file.split("-")[0]
+                print(server)
                 commit_check_list[server] = []
                 commit_memo_list[server] = {}
                 for line in f.readlines():
@@ -77,8 +78,8 @@ async def linkrepo(ctx, *args):
     url = extract_url(*args)
     with open(get_file(server), "w") as f:
         f.write(url + "\n")
-    commit_check_list[server].append(url) #(user, branch, repo))
-    commit_memo_list[server][url] = extract_commits(url) #user, branch, repo)
+    commit_check_list[server.name].append(url) #(user, branch, repo))
+    commit_memo_list[server.name][url] = extract_commits(url) #user, branch, repo)
     await client.send_message(ctx.message.channel, "Linked!")
 
 lr = linkrepo
@@ -92,11 +93,11 @@ async def check_commits():
         for server in client.servers:
             channel = discord.utils.get(server.channels, name='github')
             counter += 1
-            for url in commit_check_list[server]:
-                previous = commit_memo_list[server][url] #[u+b+r]
+            for url in commit_check_list[server.name]:
+                previous = commit_memo_list[server.name][url] #[u+b+r]
                 new = extract_commits(url) #(u, b, r)
                 output = filter(lambda i: i not in previous, new)
-                commit_memo_list[server][url] = new
+                commit_memo_list[server.name][url] = new
                 for commit in output:
                     await client.send_message(channel, commit)
         await asyncio.sleep(10) # task runs every 60 seconds

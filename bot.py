@@ -5,12 +5,24 @@ from discord.ext import commands
 import platform
 import requests
 from bs4 import BeautifulSoup
-
+import os
 
 client = Bot(description="A bot by rassarian#4378", command_prefix="!", pm_help=True)
 
-commit_check_list = []
+commit_check_list = {}
 commit_memo_list = {}
+
+def extract_url(*args):
+    _, user, repo, *__ = args[0].split("github")[1].split("/")
+    if len(args) >= 2:
+        branch = args[1]
+    else:
+        repo, *branch = repo.split("@")
+        if branch == []:
+            branch = "master"
+    # print(user, repo, branch)
+    url = f"https://github.com/{user}/{repo}/commits/{branch}"
+    return url
 
 @client.event
 async def on_ready():
@@ -27,10 +39,17 @@ async def on_ready():
 
     print("Loading links...")
 
-    with open("links.txt") as f:
-        for line in f.readlines():
-            commit_check_list.append(line)
-            commit_memo_list[line] = extract_commits(line)
+    for _, __, files in os.walk("links"):
+        print(files)
+        for file in files:
+            print(file)
+            with open("links/"+file) as f:
+                server = file.split("-")[0]
+                commit_check_list[server] = []
+                commit_memo_list[server] = {}
+                for line in f.readlines():
+                    commit_check_list[server].append(line)
+                    commit_memo_list[server][line] = extract_commits(line)
 
     print("Loaded")
 
@@ -38,37 +57,48 @@ async def on_ready():
 async def ping(*args):
     await client.say(":ping_pong: Pong!")
 
-@client.command()
-async def linkrepo(*args):
-    print(args)
-    _, user, repo, *__ = args[0].split("github")[1].split("/")
-    if len(args) >= 2:
-        branch = args[1]
-    else:
-        repo, *branch = repo.split("@")
-        if branch == []:
-            branch = "master"
-    print(user, repo, branch)
-    url = f"https://github.com/{user}/{repo}/commits/{branch}"
-    with open("links.txt", "w") as f:
+def get_file(server):
+    return "links/" + server.name + "-links.txt"
+
+@client.command(pass_context = True)
+async def unlinkrepo(ctx, *args):
+    server = ctx.message.server
+    n = get_file(server)
+    url = extract_url(*args)
+    urls = filter(lambda i: i != url, open(n).readlines())
+    with open(n, "w") as f:
+        for u in urls:
+            f.write(u + "\n")
+    print("Unlinked!")
+
+@client.command(pass_context = True)
+async def linkrepo(ctx, *args):
+    server = ctx.message.server
+    url = extract_url(*args)
+    with open(get_file(server), "w") as f:
         f.write(url + "\n")
-    commit_check_list.append(url) #(user, branch, repo))
-    commit_memo_list[url] = extract_commits(url) #user, branch, repo)
-    print(commit_memo_list[url])
+    commit_check_list[server].append(url) #(user, branch, repo))
+    commit_memo_list[server][url] = extract_commits(url) #user, branch, repo)
+    await client.send_message(ctx.message.channel, "Linked!")
+
+lr = linkrepo
+ul = ulr = unlinkrepo
 
 async def check_commits():
     await client.wait_until_ready()
     counter = 0
-    channel = discord.utils.get(client.get_all_channels(), name='github')
+
     while not client.is_closed:
-        counter += 1
-        for url in commit_check_list:
-            previous = commit_memo_list[url] #[u+b+r]
-            new = extract_commits(url) #(u, b, r)
-            output = filter(lambda i: i not in previous, new)
-            commit_memo_list[url] = new
-            for commit in output:
-                await client.send_message(channel, commit)
+        for server in client.servers:
+            channel = discord.utils.get(server.channels, name='github')
+            counter += 1
+            for url in commit_check_list[server]:
+                previous = commit_memo_list[server][url] #[u+b+r]
+                new = extract_commits(url) #(u, b, r)
+                output = filter(lambda i: i not in previous, new)
+                commit_memo_list[server][url] = new
+                for commit in output:
+                    await client.send_message(channel, commit)
         await asyncio.sleep(10) # task runs every 60 seconds
 
 def extract_commits(url):

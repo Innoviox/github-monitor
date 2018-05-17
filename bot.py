@@ -13,7 +13,10 @@ commit_check_list = {}
 commit_memo_list = {}
 
 def extract_url(*args):
-    _, user, repo, *__ = args[0].split("github")[1].split("/")
+    print(args[0].split("github")[1:])
+    print(args[0].split("github")[1].split("/"))
+    _, user, repo, *__ = 'github'.join(args[0].split("github")[1:]).split("/")
+    print(user, repo)
     if len(args) >= 2:
         branch = args[1]
     else:

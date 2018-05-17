@@ -25,6 +25,15 @@ async def on_ready():
     print('--------')
     print('Created by rassarian#4378')
 
+    print("Loading links...")
+
+    with open("links.txt") as f:
+        for line in f.readlines():
+            commit_check_list.append(line)
+            commit_memo_list[line] = extract_commits(line)
+
+    print("Loaded")
+
 @client.command()
 async def ping(*args):
     await client.say(":ping_pong: Pong!")
@@ -41,6 +50,8 @@ async def linkrepo(*args):
             branch = "master"
     print(user, repo, branch)
     url = f"https://github.com/{user}/{repo}/commits/{branch}"
+    with open("links.txt", "w") as f:
+        f.write(url + "\n")
     commit_check_list.append(url) #(user, branch, repo))
     commit_memo_list[url] = extract_commits(url) #user, branch, repo)
     print(commit_memo_list[url])
@@ -48,7 +59,7 @@ async def linkrepo(*args):
 async def check_commits():
     await client.wait_until_ready()
     counter = 0
-    channel = discord.utils.get(client.get_all_channels(), name='general')
+    channel = discord.utils.get(client.get_all_channels(), name='github')
     while not client.is_closed:
         counter += 1
         for url in commit_check_list:
@@ -58,7 +69,7 @@ async def check_commits():
             commit_memo_list[url] = new
             for commit in output:
                 await client.send_message(channel, commit)
-        await asyncio.sleep(60) # task runs every 60 seconds
+        await asyncio.sleep(10) # task runs every 60 seconds
 
 def extract_commits(url):
     commits = []
@@ -75,4 +86,4 @@ def extract_commits(url):
 
 
 client.loop.create_task(check_commits())
-client.run("REDACTED")
+client.run("NDQ2NDkwMzQ3NTQ0MTE3MjQ4.Dd5yLw.uWYZ3AxpRF0nkBXuZEzsewIOvC8")

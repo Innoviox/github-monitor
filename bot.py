@@ -6,11 +6,27 @@ import platform
 import requests
 from bs4 import BeautifulSoup
 import os
+import dataclasses as dc
 
 client = Bot(description="A bot by rassarian#4378", command_prefix="!", pm_help=True)
 
 commit_check_list = {}
 commit_memo_list = {}
+
+@dc.dataclass
+class Commit:
+    repo: str
+    user: str
+    name: str
+    text: str
+    hash: str
+    link: str
+
+    def to_embed_str(self):
+        _, user, repo, branch, *__ = self.repo.split("/")
+        return f"<a href={repo}>[{user}/{repo}: {branch}]</a><a href={link}> commit {hash} </a>"
+
+
 
 def extract_url(*args):
     # print(args[0].split("github")[1:])
@@ -105,9 +121,7 @@ async def check_commits():
                 output = filter(lambda i: i not in previous, new)
                 commit_memo_list[server.name][url] = new
                 for commit in output:
-                    embed = discord.Embed(title="Tile", description="Desc", color=0x00ff00)
-                    embed.add_field(name="Fiel1", value=commit, inline=False)
-                    embed.add_field(name="Field2", value="hi2", inline=False)
+                    embed = discord.Embed(title=commit.to_embed_str(), description=commit.text, color=0x00ff00)
                     await client.send_message(channel, embed=embed)
         await asyncio.sleep(10) # task runs every 60 seconds
 
@@ -119,9 +133,15 @@ def extract_commits(url):
     for li in soup.find_all("li", class_="commits-list-item"):
         p = li.find_all("p")[0]
         output = ' '.join(map(lambda i: i.text, p.find_all("a")))
+        link = "https://github.com" + p.find_all("a")[0].href
         user = li.find_all("a", class_="commit-author")[0]
         time = user.nextSibling.nextSibling
-        commits.append(output + " by " + user.text)
+        commits.append(Commit(repo=url,
+                              user=user,
+                              name=output,
+                              text="",
+                              hash=link.split("/")[-1][:7],
+                              link=link))
     return commits
 
 

@@ -108,7 +108,7 @@ async def check_commits():
                     embed = discord.Embed(title="Tile", description="Desc", color=0x00ff00)
                     embed.add_field(name="Fiel1", value=commit, inline=False)
                     embed.add_field(name="Field2", value="hi2", inline=False)
-                    await client.send_message(channel, embed)
+                    await client.send_message(channel, embed=embed)
         await asyncio.sleep(10) # task runs every 60 seconds
 
 def extract_commits(url):

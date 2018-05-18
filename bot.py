@@ -85,18 +85,7 @@ async def linkrepo(ctx, *args):
     commit_memo_list[server.name][url] = extract_commits(url) #user, branch, repo)
     await client.send_message(ctx.message.channel, "Linked!")
 
-@client.command(pass_context = True)
-async def lr(ctx, *args):
-    linkrepo(ctx, *args)
-
-@client.command(pass_context=True)
-async def ul(ctx, *args):
     unlinkrepo(ctx, *args)
-
-@client.command(pass_context=True)
-async def ull(ctx, *args):
-    unlinkrepo(ctx, *args)
-
 async def check_commits():
     await client.wait_until_ready()
     counter = 0

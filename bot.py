@@ -41,6 +41,11 @@ async def on_ready():
 
     print("Loading links...")
 
+    for server in client.servers:
+        if not os.path.exists(get_file(server)):
+            f = open(get_file(server), "w")
+            f.close()
+
     for _, __, files in os.walk("links"):
         print(files)
         for file in files:
@@ -53,7 +58,6 @@ async def on_ready():
                 for line in f.readlines():
                     commit_check_list[server].append(line)
                     commit_memo_list[server][line] = extract_commits(line)
-
     print("Loaded")
 
 @client.command()
@@ -86,6 +90,7 @@ async def linkrepo(ctx, *args):
 
 async def check_commits():
     await client.wait_until_ready()
+    await on_ready()
     counter = 0
 
     while not client.is_closed:

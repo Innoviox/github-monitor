@@ -13,8 +13,8 @@ commit_check_list = {}
 commit_memo_list = {}
 
 def extract_url(*args):
-    print(args[0].split("github")[1:])
-    print(args[0].split("github")[1].split("/"))
+    # print(args[0].split("github")[1:])
+    # print(args[0].split("github")[1].split("/"))
     _, user, repo, *__ = 'github'.join(args[0].split("github")[1:]).split("/")
     print(user, repo)
     if len(args) >= 2:
@@ -85,8 +85,17 @@ async def linkrepo(ctx, *args):
     commit_memo_list[server.name][url] = extract_commits(url) #user, branch, repo)
     await client.send_message(ctx.message.channel, "Linked!")
 
-lr = linkrepo
-ul = ulr = unlinkrepo
+@client.command(pass_context = True)
+async def lr(ctx, *args):
+    linkrepo(ctx, *args)
+
+@client.command(pass_context=True)
+async def ul(ctx, *args):
+    unlinkrepo(ctx, *args)
+
+@client.command(pass_context=True)
+async def ull(ctx, *args):
+    unlinkrepo(ctx, *args)
 
 async def check_commits():
     await client.wait_until_ready()
@@ -102,7 +111,10 @@ async def check_commits():
                 output = filter(lambda i: i not in previous, new)
                 commit_memo_list[server.name][url] = new
                 for commit in output:
-                    await client.send_message(channel, commit)
+                    embed = discord.Embed(title="Tile", description="Desc", color=0x00ff00)
+                    embed.add_field(name="Fiel1", value="hi", inline=False)
+                    embed.add_field(name="Field2", value="hi2", inline=False)
+                    await client.send_message(channel, embed)
         await asyncio.sleep(10) # task runs every 60 seconds
 
 def extract_commits(url):

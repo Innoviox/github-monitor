@@ -23,7 +23,6 @@ def extract_url(*args):
         repo, *branch = repo.split("@")
         if branch == []:
             branch = "master"
-    print(user, repo, branch)
     url = f"https://github.com/{user}/{repo}/commits/{branch}"
     return url
 
@@ -85,14 +84,15 @@ async def linkrepo(ctx, *args):
     commit_memo_list[server.name][url] = extract_commits(url) #user, branch, repo)
     await client.send_message(ctx.message.channel, "Linked!")
 
-    unlinkrepo(ctx, *args)
 async def check_commits():
     await client.wait_until_ready()
     counter = 0
 
     while not client.is_closed:
         for server in client.servers:
-            channel = discord.utils.get(server.channels, name='github')
+            print(server)
+            channel = discord.utils.get(server.channels, name='general')
+            print(channel)
             counter += 1
             for url in commit_check_list[server.name]:
                 previous = commit_memo_list[server.name][url] #[u+b+r]
@@ -101,7 +101,7 @@ async def check_commits():
                 commit_memo_list[server.name][url] = new
                 for commit in output:
                     embed = discord.Embed(title="Tile", description="Desc", color=0x00ff00)
-                    embed.add_field(name="Fiel1", value="hi", inline=False)
+                    embed.add_field(name="Fiel1", value=commit, inline=False)
                     embed.add_field(name="Field2", value="hi2", inline=False)
                     await client.send_message(channel, embed)
         await asyncio.sleep(10) # task runs every 60 seconds

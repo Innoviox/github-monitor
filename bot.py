@@ -23,7 +23,7 @@ class Commit:
     link: str
 
     def to_embed_str(self):
-        _, user, repo, branch, *__ = self.repo.split("/")
+        _, __, user, repo, ___, branch, *____ = self.repo.split("/")
         print(self.repo, user, repo, branch)
         # return f"<a href={repo}>[{user}/{repo}: {branch}]</a><a href={self.link}> commit {self.hash} </a>"
         return f"[{user}/{repo}: {branch}]({repo}) [commit {self.hash}]({self.link})"
@@ -136,7 +136,6 @@ def extract_commits(url):
         link = "https://github.com" + p.find_all("a", href=True)[0]['href']
         user = li.find_all("a", class_="commit-author")[0]
         time = user.nextSibling.nextSibling
-        print("repo=", page.url)
         commits.append(Commit(repo=page.url,
                               user=user,
                               name=output,

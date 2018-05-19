@@ -121,7 +121,8 @@ async def check_commits():
                 output = filter(lambda i: i not in previous, new)
                 commit_memo_list[server.name][url] = new
                 for commit in output:
-                    embed = discord.Embed(title=commit.to_embed_str(), description=commit.text, color=0x00ff00)
+                    embed = discord.Embed(title="New commit", description="", color=0x00ff00)
+                    embed.add_field(name="Field1", value=commit.to_embed_str(), inline=False)
                     await client.send_message(channel, embed=embed)
         await asyncio.sleep(10) # task runs every 60 seconds
 
@@ -135,7 +136,7 @@ def extract_commits(url):
         link = "https://github.com" + p.find_all("a", href=True)[0]['href']
         user = li.find_all("a", class_="commit-author")[0]
         time = user.nextSibling.nextSibling
-        commits.append(Commit(repo=url,
+        commits.append(Commit(repo=page.url,
                               user=user,
                               name=output,
                               text="",

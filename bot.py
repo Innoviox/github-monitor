@@ -24,7 +24,7 @@ class Commit:
 
     def to_embed_str(self):
         _, user, repo, branch, *__ = self.repo.split("/")
-        return f"<a href={repo}>[{user}/{repo}: {branch}]</a><a href={link}> commit {hash} </a>"
+        return f"<a href={repo}>[{user}/{repo}: {branch}]</a><a href={self.link}> commit {self.hash} </a>"
 
 
 

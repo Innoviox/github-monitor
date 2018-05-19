@@ -72,8 +72,8 @@ async def on_ready():
                 commit_check_list[server] = []
                 commit_memo_list[server] = {}
                 for line in f.readlines():
-                    commit_check_list[server].append(line)
-                    commit_memo_list[server][line] = extract_commits(line)
+                    commit_check_list[server].append(line.strip())
+                    commit_memo_list[server][line.strip()] = extract_commits(line.strip())
     print("Loaded")
 
 @client.command()
@@ -111,13 +111,12 @@ async def check_commits():
 
     while not client.is_closed:
         for server in client.servers:
-            print(server)
             channel = discord.utils.get(server.channels, name='general')
-            print(channel)
             counter += 1
             for url in commit_check_list[server.name]:
-                previous = commit_memo_list[server.name][url] #[u+b+r]
-                new = extract_commits(url) #(u, b, r)
+                print(url)
+                previous = commit_memo_list[server.name][url.strip()] #[u+b+r]
+                new = extract_commits(url.strip()) #(u, b, r)
                 output = filter(lambda i: i not in previous, new)
                 commit_memo_list[server.name][url] = new
                 for commit in output:
@@ -129,11 +128,10 @@ def extract_commits(url):
     commits = []
     page = requests.get(url)
     soup = BeautifulSoup(page.text, 'html.parser')
-
     for li in soup.find_all("li", class_="commits-list-item"):
         p = li.find_all("p")[0]
         output = ' '.join(map(lambda i: i.text, p.find_all("a")))
-        link = "https://github.com" + p.find_all("a")[0].href
+        link = "https://github.com" + p.find_all("a", href=True)[0]['href']
         user = li.find_all("a", class_="commit-author")[0]
         time = user.nextSibling.nextSibling
         commits.append(Commit(repo=url,

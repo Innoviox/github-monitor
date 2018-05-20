@@ -30,8 +30,9 @@ class Commit:
 
 
 def extract_url(*args):
-    # print(args[0].split("github")[1:])
-    # print(args[0].split("github")[1].split("/"))
+    print(args[0])
+    print(args[0].split("github")[1:])
+    print(args[0].split("github")[1].split("/"))
     _, user, repo, *__ = 'github'.join(args[0].split("github")[1:]).split("/")
     print(user, repo)
     if len(args) >= 2:

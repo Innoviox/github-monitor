@@ -23,6 +23,8 @@ class Commit:
     link: str
 
     def to_embed_str(self):
+        print(self.repo)
+        print(self.repo.split("/"))
         _, __, user, repo, ___, branch = self.repo.split("/")
         print(self.repo, user, repo, branch)
         # return f"<a href={repo}>[{user}/{repo}: {branch}]</a><a href={self.link}> commit {self.hash} </a>"
@@ -30,9 +32,6 @@ class Commit:
 
 
 def extract_url(*args):
-    print(args[0])
-    print(args[0].split("github")[1:])
-    print(args[0].split("github")[1].split("/"))
     _, user, repo, *__ = 'github'.join(args[0].split("github")[1:]).split("/")
     print(user, repo)
     if len(args) >= 2:
